@@ -11,142 +11,11 @@ const descargar = document.getElementById("descargar");
 const compartir = document.getElementById("compartir");
 let stream = null;
 let usandoFrontal = false;
-let zoomActual = 1;
-/* =====================================
-   INFORMACIÓN DE LAS CÁMARAS
-===================================== */
-async function listarCamaras() {
-  try {
-    const dispositivos =
-      await navigator.mediaDevices.enumerateDevices();
-    const camaras =
-      dispositivos.filter(
-        dispositivo =>
-          dispositivo.kind === "videoinput"
-      );
-    console.log("=================================");
-    console.log("CÁMARAS DETECTADAS POR SAFARI");
-    console.log("=================================");
-    camaras.forEach((camara, indice) => {
-      console.log(
-        "Cámara #" + (indice + 1)
-      );
-      console.log(
-        "Nombre:",
-        camara.label || "Sin nombre"
-      );
-      console.log(
-        "Device ID:",
-        camara.deviceId
-      );
-      console.log(
-        "Group ID:",
-        camara.groupId
-      );
-      console.log("---------------------------------");
-    });
-  } catch (error) {
-    console.error(
-      "Error enumerando cámaras:",
-      error
-    );
-  }
-}
-/* =====================================
-   MOSTRAR INFORMACIÓN REAL DE LA CÁMARA
-===================================== */
-function mostrarInformacionCamara(track) {
-  if (!track) {
-    return;
-  }
-  const settings =
-    track.getSettings();
-  const capabilities =
-    track.getCapabilities
-      ? track.getCapabilities()
-      : {};
-  console.log("");
-  console.log("=================================");
-  console.log("CÁMARA ACTUALMENTE UTILIZADA");
-  console.log("=================================");
-  console.log(
-    "Device ID:",
-    settings.deviceId || "No disponible"
-  );
-  console.log(
-    "Group ID:",
-    settings.groupId || "No disponible"
-  );
-  console.log(
-    "Resolución:",
-    settings.width,
-    "x",
-    settings.height
-  );
-  console.log(
-    "Relación de aspecto:",
-    settings.aspectRatio
-  );
-  console.log(
-    "Facing mode:",
-    settings.facingMode
-  );
-  console.log(
-    "Frame rate:",
-    settings.frameRate
-  );
-  console.log(
-    "Zoom actual:",
-    settings.zoom
-  );
-  console.log(
-    "Zoom soportado:",
-    capabilities.zoom || "No disponible"
-  );
-  console.log(
-    "Resoluciones disponibles:",
-    capabilities.width || "No disponible"
-  );
-  console.log(
-    "Alturas disponibles:",
-    capabilities.height || "No disponible"
-  );
-  console.log(
-    "================================="
-  );
-  /*
-   * Mostrar también la información
-   * directamente en pantalla.
-   */
-  let mensaje = "";
-  mensaje +=
-    "Cámara detectada\n\n";
-  mensaje +=
-    "Resolución: " +
-    (settings.width || "?") +
-    " × " +
-    (settings.height || "?") +
-    "\n";
-  mensaje +=
-    "Relación: " +
-    (settings.aspectRatio || "?") +
-    "\n";
-  mensaje +=
-    "Cámara: " +
-    (settings.facingMode || "?") +
-    "\n";
-  mensaje +=
-    "Zoom: " +
-    (settings.zoom || "1") +
-    "\n\n";
-  mensaje +=
-    "Revisa también la consola de Safari.";
-  console.log(mensaje);
-}
-/* =====================================
+/* =====================================================
    INICIAR CÁMARA
-===================================== */
+===================================================== */
 async function iniciarCamara() {
+  /* Detener cámara anterior */
   if (stream) {
     stream
       .getTracks()
@@ -157,140 +26,109 @@ async function iniciarCamara() {
     /*
      * IMPORTANTE:
      *
-     * NO seleccionamos todavía un
-     * deviceId específico.
+     * No imponemos:
+     * - resolución
+     * - aspectRatio
+     * - zoom
+     * - frameRate
      *
-     * Primero necesitamos saber cuál
-     * cámara está escogiendo Safari.
+     * Dejamos que iOS/Safari entregue
+     * el formato nativo de la cámara.
      */
     const constraints = {
       video: {
-        facingMode: "environment"
-          },
-       audio:false
-          },
-        /*
-         * No forzamos recorte.
-         */
-        aspectRatio: {
-          ideal: 9 / 16
-        },
-        /*
-         * Resolución como preferencia.
-         */
-        width: {
-          ideal: 1440
-        },
-        height: {
-          ideal: 2560
-        },
-        frameRate: {
-          ideal: 30
-        }
+        facingMode: usandoFrontal
+          ? "user"
+          : "environment"
       },
       audio: false
     };
-    console.log(
-      "Solicitando cámara..."
-    );
-    console.log(
-      constraints
-    );
     stream =
       await navigator.mediaDevices
         .getUserMedia(constraints);
-    video.srcObject =
-      stream;
+    video.srcObject = stream;
+    /*
+     * MUY IMPORTANTE:
+     *
+     * Nunca espejamos la cámara.
+     *
+     * Tanto la trasera como la selfie
+     * se muestran tal cual las entrega
+     * el dispositivo.
+     */
+    video.style.transform = "none";
     await video.play();
+    /*
+     * Intentar colocar el zoom físico/digital
+     * del track en 1 si Safari lo expone.
+     *
+     * Si el iPhone no permite modificarlo,
+     * simplemente continúa sin error.
+     */
     const track =
       stream.getVideoTracks()[0];
-    mostrarInformacionCamara(track);
-    /*
-     * Eliminar cualquier transformación
-     * visual que pudiera producir zoom.
-     */
-    video.style.transform =
-      "none";
-    /*
-     * Volvemos a enumerar las cámaras
-     * después de obtener permiso.
-     *
-     * Esto es importante porque Safari
-     * puede revelar los nombres después
-     * de conceder acceso.
-     */
-    await listarCamaras();
+    if (
+      track &&
+      track.getCapabilities
+    ) {
+      const capabilities =
+        track.getCapabilities();
+      if (
+        capabilities.zoom &&
+        capabilities.zoom.min !== undefined
+      ) {
+        try {
+          await track.applyConstraints({
+            advanced: [
+              {
+                zoom: capabilities.zoom.min
+              }
+            ]
+          });
+        } catch (error) {
+          console.log(
+            "El dispositivo no permite modificar el zoom."
+          );
+        }
+      }
+    }
   } catch (error) {
     console.error(
       "Error iniciando cámara:",
       error
     );
-    /*
-     * Segundo intento compatible.
-     */
-    try {
-      stream =
-        await navigator.mediaDevices
-          .getUserMedia({
-            video: {
-              facingMode:
-                usandoFrontal
-                  ? "user"
-                  : "environment"
-            },
-            audio: false
-          });
-      video.srcObject =
-        stream;
-      await video.play();
-      const track =
-        stream.getVideoTracks()[0];
-      mostrarInformacionCamara(track);
-      video.style.transform =
-        "none";
-      await listarCamaras();
-    } catch (error2) {
-      console.error(
-        error2
-      );
-      alert(
-        "No pudimos acceder a la cámara. " +
-        "Verifica los permisos de cámara."
-      );
-    }
+    alert(
+      "No pudimos acceder a la cámara. " +
+      "Verifica que Safari tenga permiso para utilizarla."
+    );
   }
 }
-/* =====================================
+/* =====================================================
    ABRIR CÁMARA
-===================================== */
+===================================================== */
 abrirCamara.addEventListener(
   "click",
   async () => {
-    inicio.classList.add(
-      "oculto"
-    );
-    camara.classList.remove(
-      "oculto"
-    );
-    zoomActual = 1;
+    inicio.classList.add("oculto");
+    camara.classList.remove("oculto");
+    usandoFrontal = false;
     await iniciarCamara();
   }
 );
-/* =====================================
+/* =====================================================
    CAMBIAR CÁMARA
-===================================== */
+===================================================== */
 cambiarCamara.addEventListener(
   "click",
   async () => {
     usandoFrontal =
       !usandoFrontal;
-    zoomActual = 1;
     await iniciarCamara();
   }
 );
-/* =====================================
+/* =====================================================
    TOMAR FOTO
-===================================== */
+===================================================== */
 tomarFoto.addEventListener(
   "click",
   () => {
@@ -300,39 +138,28 @@ tomarFoto.addEventListener(
     ) {
       return;
     }
+    /*
+     * Utilizamos EXACTAMENTE la resolución
+     * que está entregando el video.
+     */
     const ancho =
       video.videoWidth;
     const alto =
       video.videoHeight;
     const canvas =
-      document.createElement(
-        "canvas"
-      );
+      document.createElement("canvas");
     canvas.width =
       ancho;
     canvas.height =
       alto;
     const ctx =
-      canvas.getContext(
-        "2d"
-      );
+      canvas.getContext("2d");
     /*
-     * Cámara frontal:
-     * mantener efecto espejo.
-     */
-    if (usandoFrontal) {
-      ctx.translate(
-        ancho,
-        0
-      );
-      ctx.scale(
-        -1,
-        1
-      );
-    }
-    /*
-     * Capturar EXACTAMENTE
-     * el video recibido.
+     * NO hacemos:
+     *
+     * scale(-1,1)
+     *
+     * La selfie NO debe quedar reflejada.
      */
     ctx.drawImage(
       video,
@@ -347,14 +174,10 @@ tomarFoto.addEventListener(
     const marco =
       new Image();
     marco.onload = () => {
-      ctx.setTransform(
-        1,
-        0,
-        0,
-        1,
-        0,
-        0
-      );
+      /*
+       * El marco utiliza exactamente
+       * las mismas dimensiones de la foto.
+       */
       ctx.drawImage(
         marco,
         0,
@@ -362,6 +185,10 @@ tomarFoto.addEventListener(
         ancho,
         alto
       );
+      /*
+       * PNG para conservar la máxima
+       * calidad posible.
+       */
       const imagen =
         canvas.toDataURL(
           "image/png"
@@ -376,13 +203,13 @@ tomarFoto.addEventListener(
       resultado.classList.remove(
         "oculto"
       );
+      /*
+       * Apagar cámara.
+       */
       if (stream) {
         stream
           .getTracks()
-          .forEach(
-            track =>
-              track.stop()
-          );
+          .forEach(track => track.stop());
         stream = null;
       }
     };
@@ -390,9 +217,9 @@ tomarFoto.addEventListener(
       "marco.png";
   }
 );
-/* =====================================
+/* =====================================================
    OTRA FOTO
-===================================== */
+===================================================== */
 otraFoto.addEventListener(
   "click",
   async () => {
@@ -402,13 +229,12 @@ otraFoto.addEventListener(
     camara.classList.remove(
       "oculto"
     );
-    zoomActual = 1;
     await iniciarCamara();
   }
 );
-/* =====================================
+/* =====================================================
    COMPARTIR
-===================================== */
+===================================================== */
 compartir.addEventListener(
   "click",
   async () => {
@@ -448,12 +274,9 @@ compartir.addEventListener(
       }
     } catch (error) {
       console.error(
+        "Error compartiendo:",
         error
       );
     }
   }
 );
-/* =====================================
-   INICIO
-===================================== */
-listarCamaras();
