@@ -77,76 +77,192 @@ body {
   transform: scale(.97);
 }
 
-/* CÁMARA */
+/* =====================================================
+   CÁMARA
+===================================================== */
 
 .camaraPantalla {
   position: relative;
-  background: #000;
-}
-
-.visor {
-  position: relative;
   width: 100%;
   height: 100%;
+  background: #000;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
   overflow: hidden;
 }
 
+
+/*
+ * =====================================================
+ * VISOR 9:16
+ *
+ * EXACTAMENTE la misma proporción
+ * que marco.png (1080x1920).
+ * =====================================================
+ */
+
+.visor {
+
+  position: relative;
+
+  width: min(
+    100vw,
+    calc(100dvh * 9 / 16)
+  );
+
+  aspect-ratio: 9 / 16;
+
+  height: auto;
+
+  overflow: hidden;
+
+  background: #000;
+
+  flex-shrink: 0;
+}
+
+
+/*
+ * =====================================================
+ * VIDEO
+ *
+ * Cover aquí SÍ es intencional.
+ *
+ * Como el visor ya es exactamente 9:16,
+ * cover solamente recorta los lados que sobran.
+ *
+ * NO cambia la proporción.
+ * =====================================================
+ */
+
 #video {
+
+  position: absolute;
+
+  inset: 0;
+
   width: 100%;
   height: 100%;
-  object-fit: contain;
+
+  object-fit: cover;
+
   background: #000;
+
   transform: none;
+
   transform-origin: center center;
 }
 
+
+/*
+ * =====================================================
+ * MARCO
+ *
+ * El marco también es 9:16.
+ * Se superpone exactamente sobre el video.
+ * =====================================================
+ */
+
 #marco {
+
   position: absolute;
+
   inset: 0;
+
   width: 100%;
   height: 100%;
-  object-fit: contain;
+
+  object-fit: fill;
+
   pointer-events: none;
+
 }
+
+
+/* =====================================================
+   CONTROLES
+===================================================== */
 
 .controles {
-  position: absolute;
-  bottom: max(35px, env(safe-area-inset-bottom));
+
+  position: fixed;
+
+  bottom:
+    max(
+      35px,
+      env(safe-area-inset-bottom)
+    );
+
   left: 0;
+
   width: 100%;
+
   display: flex;
+
   justify-content: center;
+
   align-items: center;
+
+  z-index: 10;
 }
+
 
 .disparador {
+
   width: 78px;
+
   height: 78px;
+
   border-radius: 50%;
+
   border: 5px solid white;
+
   background: transparent;
+
   display: flex;
+
   justify-content: center;
+
   align-items: center;
+
 }
+
 
 .disparador span {
+
   width: 62px;
+
   height: 62px;
+
   border-radius: 50%;
+
   background: white;
+
 }
+
 
 .pequeño {
-  position: absolute;
-  right: 25px;
-  width: 48px;
-  height: 48px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 25px;
-}
 
+  position: fixed;
+
+  right: 25px;
+
+  width: 48px;
+
+  height: 48px;
+
+  padding: 0;
+
+  border-radius: 50%;
+
+  font-size: 25px;
+
+  z-index: 11;
+
+}
 /* RESULTADO */
 
 #resultado {
