@@ -30,40 +30,42 @@ async function iniciarCamara() {
 
   try {
 
-    /*
-     * Solicitamos específicamente una cámara
-     * vertical 9:16.
-     *
-     * No fijamos 1080, 1920, etc.
-     * El dispositivo escogerá la máxima
-     * resolución que pueda entregar.
-     */
-
     const constraints = {
-
       video: {
 
         facingMode: usandoFrontal
-          ? "user"
-          : "environment",
+          ? { ideal: "user" }
+          : { ideal: "environment" },
 
-        width: {
-          ideal: 2160
-        },
-
-        height: {
-          ideal: 3840
-        },
+        /*
+         * Pedimos formato vertical, pero NO
+         * obligamos a una resolución específica.
+         *
+         * Esto permite que Safari seleccione
+         * el modo de cámara que considere
+         * adecuado.
+         */
 
         aspectRatio: {
           ideal: 9 / 16
         },
 
-        frameRate: {
-          ideal: 30,
-          max: 60
-        }
+        /*
+         * La resolución queda como preferencia,
+         * no como obligación.
+         */
 
+        width: {
+          ideal: 1440
+        },
+
+        height: {
+          ideal: 2560
+        },
+
+        frameRate: {
+          ideal: 30
+        }
       },
 
       audio: false
@@ -81,7 +83,7 @@ async function iniciarCamara() {
 
 
     /*
-     * Información real de la cámara.
+     * Obtener información real de la cámara.
      */
 
     const track =
@@ -93,38 +95,43 @@ async function iniciarCamara() {
         track.getSettings();
 
       console.log(
-        "Cámara:",
+        "Resolución real:",
         settings.width,
         "x",
         settings.height
       );
 
       console.log(
-        "Relación:",
+        "Relación real:",
         settings.aspectRatio
       );
+
+      console.log(
+        "Zoom disponible:",
+        settings.zoom
+      );
+
     }
 
 
     /*
-     * Intentamos mantener el video
-     * en formato vertical.
+     * Sin zoom digital.
      */
 
     video.style.transform =
-      scale(${zoomActual});
+      "none";
+
 
   } catch (error) {
 
     console.error(
-      "Error cámara vertical:",
+      "Error iniciando cámara:",
       error
     );
 
 
     /*
-     * Segundo intento para dispositivos
-     * que no acepten aspectRatio.
+     * Segundo intento más compatible.
      */
 
     try {
@@ -138,15 +145,7 @@ async function iniciarCamara() {
               facingMode:
                 usandoFrontal
                   ? "user"
-                  : "environment",
-
-              width: {
-                ideal: 2160
-              },
-
-              height: {
-                ideal: 3840
-              }
+                  : "environment"
 
             },
 
@@ -160,22 +159,9 @@ async function iniciarCamara() {
 
       await video.play();
 
+      video.style.transform =
+        "none";
 
-      const track =
-        stream.getVideoTracks()[0];
-
-      if (track) {
-
-        const settings =
-          track.getSettings();
-
-        console.log(
-          "Resolución alternativa:",
-          settings.width,
-          "x",
-          settings.height
-        );
-      }
 
     } catch (error2) {
 
@@ -191,8 +177,6 @@ async function iniciarCamara() {
     }
   }
 }
-
-
 /* =====================================
    ABRIR CÁMARA
 ===================================== */
