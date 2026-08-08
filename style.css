@@ -97,6 +97,10 @@ body {
   object-fit: cover;
 }
 
+#video.selfie {
+  transform: scaleX (-1)
+}
+
 #marco {
   position: absolute;
   inset: 0;
