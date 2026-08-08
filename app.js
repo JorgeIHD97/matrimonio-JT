@@ -16,6 +16,60 @@ let stream = null;
 let usandoFrontal = false;
 let zoomActual = 1;
 
+async function listarCamaras() {
+
+  try {
+
+    const dispositivos =
+      await navigator.mediaDevices.enumerateDevices();
+
+    const camaras =
+      dispositivos.filter(
+        dispositivo =>
+          dispositivo.kind === "videoinput"
+      );
+
+    console.log("Cámaras disponibles:");
+
+    camaras.forEach(
+      (camara, indice) => {
+
+        console.log(
+          indice + 1,
+          camara.label ||
+          "Cámara sin nombre",
+          camara.deviceId
+        );
+
+      }
+    );
+
+    alert(
+      "Safari detectó " +
+      camaras.length +
+      " cámara(s).\n\n" +
+      camaras
+        .map(
+          (camara, indice) =>
+            (indice + 1) +
+            ". " +
+            (
+              camara.label ||
+              "Cámara sin nombre"
+            )
+        )
+        .join("\n")
+    );
+
+  } catch (error) {
+
+    console.error(
+      "Error enumerando cámaras:",
+      error
+    );
+
+  }
+}
 
 /* =====================================
    INICIAR CÁMARA VERTICAL
@@ -478,3 +532,5 @@ compartir.addEventListener(
     }
   }
 );
+
+listarCamaras();
