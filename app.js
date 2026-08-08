@@ -165,10 +165,10 @@ async function iniciarCamara() {
      */
     const constraints = {
       video: {
-        facingMode:
-          usandoFrontal
-            ? { ideal: "user" }
-            : { ideal: "environment" },
+        facingMode: "environment"
+          },
+       audio:false
+          },
         /*
          * No forzamos recorte.
          */
