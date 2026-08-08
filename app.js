@@ -12,8 +12,297 @@ const fotoFinal = document.getElementById("fotoFinal");
 const descargar = document.getElementById("descargar");
 const compartir = document.getElementById("compartir");
 
+/* =====================================================
+   CONTROLES DE ZOOM
+===================================================== */
+
+const zoom05 = document.getElementById("zoom05");
+const zoom1 = document.getElementById("zoom1");
+const zoom2 = document.getElementById("zoom2");
+const zoomSlider = document.getElementById("zoomSlider");
+
 let stream = null;
 let usandoFrontal = false;
+
+/*
+ * Zoom que estamos mostrando.
+ *
+ * 1 = normal
+ * 2 = acercamiento
+ *
+ * 0.5 intenta abrir el encuadre.
+ */
+let zoomActual = 1;
+
+
+/* =====================================================
+   ACTUALIZAR ZOOM VISUAL
+===================================================== */
+
+function actualizarZoom() {
+
+  /*
+   * El zoom se aplica visualmente al video.
+   *
+   * No utilizamos zoom digital de Safari porque
+   * en iPhone no siempre está disponible.
+   */
+
+  video.style.transform =
+    scale(${zoomActual});
+
+  /*
+   * Actualizar posición del deslizador.
+   */
+  if (zoomSlider) {
+    zoomSlider.value = zoomActual;
+  }
+
+  /*
+   * Marcar botón activo.
+   */
+  if (zoom05) {
+    zoom05.classList.toggle(
+      "activo",
+      zoomActual === 0.5
+    );
+  }
+
+  if (zoom1) {
+    zoom1.classList.toggle(
+      "activo",
+      zoomActual === 1
+    );
+  }
+
+  if (zoom2) {
+    zoom2.classList.toggle(
+      "activo",
+      zoomActual === 2
+    );
+  }
+
+}
+
+
+/* =====================================================
+   INTENTAR APLICAR ZOOM REAL DE LA CÁMARA
+===================================================== */
+
+async function aplicarZoomCamara(valor) {
+
+  if (!stream) {
+    return false;
+  }
+
+  const track =
+    stream.getVideoTracks()[0];
+
+  if (!track) {
+    return false;
+  }
+
+  /*
+   * Safari/iPhone puede no exponer
+   * el control de zoom.
+   */
+
+  if (
+    !track.getCapabilities ||
+    !track.applyConstraints
+  ) {
+    return false;
+  }
+
+  const capabilities =
+    track.getCapabilities();
+
+  if (!capabilities.zoom) {
+    return false;
+  }
+
+  const minimo =
+    capabilities.zoom.min;
+
+  const maximo =
+    capabilities.zoom.max;
+
+  /*
+   * Intentamos convertir nuestro valor
+   * 0.5 / 1 / 2 a un valor que acepte
+   * realmente la cámara.
+   *
+   * Para 1x usamos el valor 1 cuando
+   * está disponible.
+   */
+
+  let zoomReal = valor;
+
+  zoomReal =
+    Math.max(
+      minimo,
+      Math.min(
+        maximo,
+        zoomReal
+      )
+    );
+
+  try {
+
+    await track.applyConstraints({
+      advanced: [
+        {
+          zoom: zoomReal
+        }
+      ]
+    });
+
+    return true;
+
+  } catch (error) {
+
+    console.log(
+      "La cámara no permite modificar el zoom:",
+      error
+    );
+
+    return false;
+
+  }
+
+}
+
+
+/* =====================================================
+   CAMBIAR ZOOM
+===================================================== */
+
+async function cambiarZoom(valor) {
+
+  zoomActual = valor;
+
+  /*
+   * Primero intentamos utilizar el zoom
+   * real de la cámara.
+   */
+
+  const zoomRealAplicado =
+    await aplicarZoomCamara(valor);
+
+  /*
+   * Si Safari no permite controlar
+   * el zoom real, usamos transformación
+   * visual como respaldo.
+   *
+   * IMPORTANTE:
+   * El zoom visual también se tendrá
+   * en cuenta al tomar la fotografía.
+   */
+
+  if (!zoomRealAplicado) {
+
+    actualizarZoom();
+
+  } else {
+
+    /*
+     * Si la cámara sí aceptó el zoom real,
+     * no agregamos zoom CSS adicional.
+     */
+
+    video.style.transform =
+      "none";
+
+    if (zoomSlider) {
+      zoomSlider.value =
+        zoomActual;
+    }
+
+    if (zoom05) {
+      zoom05.classList.toggle(
+        "activo",
+        zoomActual === 0.5
+      );
+    }
+
+    if (zoom1) {
+      zoom1.classList.toggle(
+        "activo",
+        zoomActual === 1
+      );
+    }
+
+    if (zoom2) {
+      zoom2.classList.toggle(
+        "activo",
+        zoomActual === 2
+      );
+    }
+
+  }
+
+}
+
+
+/* =====================================================
+   BOTONES DE ZOOM
+===================================================== */
+
+if (zoom05) {
+
+  zoom05.addEventListener(
+    "click",
+    () => {
+      cambiarZoom(0.5);
+    }
+  );
+
+}
+
+if (zoom1) {
+
+  zoom1.addEventListener(
+    "click",
+    () => {
+      cambiarZoom(1);
+    }
+  );
+
+}
+
+if (zoom2) {
+
+  zoom2.addEventListener(
+    "click",
+    () => {
+      cambiarZoom(2);
+    }
+  );
+
+}
+
+
+/* =====================================================
+   DESLIZADOR DE ZOOM
+===================================================== */
+
+if (zoomSlider) {
+
+  zoomSlider.addEventListener(
+    "input",
+    () => {
+
+      const valor =
+        parseFloat(
+          zoomSlider.value
+        );
+
+      cambiarZoom(valor);
+
+    }
+  );
+
+}
 
 
 /* =====================================================
@@ -22,88 +311,135 @@ let usandoFrontal = false;
 
 async function iniciarCamara() {
 
+  /*
+   * Apagar cámara anterior.
+   */
+
   if (stream) {
 
     stream
       .getTracks()
-      .forEach(track => track.stop());
+      .forEach(
+        track => track.stop()
+      );
 
     stream = null;
+
   }
+
 
   try {
 
     /*
-     * No forzamos resolución ni relación de aspecto.
-     * Dejamos que Safari entregue el video de la cámara.
+     * NO forzamos 9:16.
+     *
+     * Dejamos que Safari entregue
+     * el formato nativo de la cámara.
+     *
+     * Esto es fundamental para evitar
+     * que Safari recorte el campo de visión.
      */
 
-    stream = await navigator.mediaDevices.getUserMedia({
+    stream =
+      await navigator.mediaDevices.getUserMedia({
 
-      video: {
-        facingMode: usandoFrontal
-          ? "user"
-          : "environment"
-      },
+        video: {
 
-      audio: false
+          facingMode:
+            usandoFrontal
+              ? "user"
+              : "environment",
 
-    });
+          /*
+           * Pedimos una resolución alta,
+           * pero NO imponemos relación 9:16.
+           */
+
+          width: {
+            ideal: 1920
+          },
+
+          height: {
+            ideal: 1080
+          }
+
+        },
+
+        audio: false
+
+      });
 
 
-    video.srcObject = stream;
+    /*
+     * Conectar cámara al video.
+     */
+
+    video.srcObject =
+      stream;
+
 
     /*
      * Nunca espejamos la cámara.
      */
-    video.style.transform = "none";
+
+    video.style.transform =
+      "none";
+
+
+    /*
+     * Esperar a que el video esté listo.
+     */
 
     await video.play();
 
 
     /*
-     * Intentamos quitar cualquier zoom
-     * que Safari exponga como controlable.
+     * Mostrar en consola qué resolución
+     * está entregando realmente Safari.
+     *
+     * Esto nos servirá para comprobar
+     * si el iPhone entrega 1920x1080,
+     * 1280x720, etc.
      */
 
-    const track = stream.getVideoTracks()[0];
+    console.log(
+      "Resolución real del video:",
+      video.videoWidth,
+      "x",
+      video.videoHeight
+    );
 
-    if (
-      track &&
-      track.getCapabilities
-    ) {
 
-      const capabilities =
-        track.getCapabilities();
+    const track =
+      stream.getVideoTracks()[0];
 
-      if (
-        capabilities.zoom &&
-        capabilities.zoom.min !== undefined
-      ) {
 
-        try {
+    if (track) {
 
-          await track.applyConstraints({
+      console.log(
+        "Configuración real de cámara:",
+        track.getSettings()
+      );
 
-            advanced: [
-              {
-                zoom: capabilities.zoom.min
-              }
-            ]
+      if (track.getCapabilities) {
 
-          });
-
-        } catch (error) {
-
-          console.log(
-            "El zoom no puede modificarse en este dispositivo."
-          );
-
-        }
+        console.log(
+          "Capacidades de cámara:",
+          track.getCapabilities()
+        );
 
       }
 
     }
+
+
+    /*
+     * Comenzar siempre en 1x.
+     */
+
+    zoomActual = 1;
+
+    actualizarZoom();
 
   } catch (error) {
 
@@ -130,9 +466,13 @@ abrirCamara.addEventListener(
   "click",
   async () => {
 
-    inicio.classList.add("oculto");
+    inicio.classList.add(
+      "oculto"
+    );
 
-    camara.classList.remove("oculto");
+    camara.classList.remove(
+      "oculto"
+    );
 
     usandoFrontal = false;
 
@@ -150,7 +490,8 @@ cambiarCamara.addEventListener(
   "click",
   async () => {
 
-    usandoFrontal = !usandoFrontal;
+    usandoFrontal =
+      !usandoFrontal;
 
     await iniciarCamara();
 
@@ -178,41 +519,38 @@ tomarFoto.addEventListener(
      * =================================================
      * FOTO FINAL
      *
-     * El marco es 1080 x 1920.
-     * Por lo tanto TODAS las fotos finales
-     * serán exactamente 1080 x 1920.
+     * El marco continúa siendo 1080 x 1920.
      * =================================================
      */
 
-    const destinoAncho = 1080;
-    const destinoAlto = 1920;
+    const destinoAncho =
+      1080;
+
+    const destinoAlto =
+      1920;
 
 
     const canvas =
-      document.createElement("canvas");
+      document.createElement(
+        "canvas"
+      );
 
-    canvas.width = destinoAncho;
-    canvas.height = destinoAlto;
+    canvas.width =
+      destinoAncho;
+
+    canvas.height =
+      destinoAlto;
 
 
     const ctx =
-      canvas.getContext("2d");
+      canvas.getContext(
+        "2d"
+      );
 
 
     /*
      * =================================================
-     * RECORTE DEL VIDEO
-     *
-     * Queremos obtener una imagen 9:16
-     * sin deformarla.
-     *
-     * Si el video es más ancho:
-     *     recortamos los lados.
-     *
-     * Si el video ya es 9:16:
-     *     utilizamos todo.
-     *
-     * Nunca estiramos la imagen.
+     * DIMENSIONES REALES DEL VIDEO
      * =================================================
      */
 
@@ -223,81 +561,221 @@ tomarFoto.addEventListener(
       video.videoHeight;
 
 
-    const proporcionObjetivo =
-      destinoAncho / destinoAlto;
+    /*
+     * =================================================
+     * IMPORTANTE
+     *
+     * Safari normalmente entrega el video
+     * de la cámara trasera en formato horizontal
+     * aunque el teléfono esté físicamente vertical.
+     *
+     * Ejemplo:
+     *
+     * 1920 x 1080
+     *
+     * Si simplemente recortamos ese video a 9:16,
+     * perdemos una enorme cantidad de información
+     * de los lados.
+     *
+     * En lugar de eso:
+     *
+     * 1. Utilizamos TODO el video.
+     * 2. Lo giramos 90 grados.
+     * 3. Lo colocamos en 1080 x 1920.
+     *
+     * De esta manera:
+     *
+     * 1920 x 1080
+     *
+     * pasa a:
+     *
+     * 1080 x 1920
+     *
+     * sin recortar los lados.
+     * =================================================
+     */
 
 
-    const proporcionVideo =
-      videoAncho / videoAlto;
+    const videoEsHorizontal =
+      videoAncho >
+      videoAlto;
 
 
-    let sx = 0;
-    let sy = 0;
-    let sw = videoAncho;
-    let sh = videoAlto;
+    /*
+     * =================================================
+     * ZOOM
+     *
+     * Si el zoom real de la cámara no está disponible,
+     * el video puede estar usando el zoom CSS.
+     *
+     * En ese caso hacemos el mismo zoom directamente
+     * sobre el canvas.
+     * =================================================
+     */
+
+    let factorZoom =
+      zoomActual;
 
 
-    if (
-      proporcionVideo > proporcionObjetivo
-    ) {
+    /*
+     * Para evitar que un valor inferior a 1
+     * produzca un canvas con zonas vacías,
+     * el zoom de captura mínimo será 1.
+     *
+     * El verdadero 0.5x óptico solamente puede
+     * conseguirse seleccionando el lente ultra
+     * gran angular del iPhone.
+     */
 
-      /*
-       * El video es demasiado ancho.
-       *
-       * Conservamos TODO el alto
-       * y recortamos los lados.
-       */
-
-      sw =
-        videoAlto *
-        proporcionObjetivo;
-
-      sx =
-        (videoAncho - sw) / 2;
-
-    } else if (
-      proporcionVideo < proporcionObjetivo
-    ) {
-
-      /*
-       * Si alguna cámara entrega un formato
-       * más estrecho, recortamos arriba/abajo.
-       */
-
-      sh =
-        videoAncho /
-        proporcionObjetivo;
-
-      sy =
-        (videoAlto - sh) / 2;
-
+    if (factorZoom < 1) {
+      factorZoom = 1;
     }
 
 
     /*
      * =================================================
-     * DIBUJAR LA CÁMARA
-     *
-     * IMPORTANTE:
-     * NO hacemos espejo en la cámara frontal.
+     * DIBUJAR VIDEO
      * =================================================
      */
 
-    ctx.drawImage(
+    ctx.save();
 
-      video,
 
-      sx,
-      sy,
-      sw,
-      sh,
+    if (videoEsHorizontal) {
 
-      0,
-      0,
-      destinoAncho,
-      destinoAlto
+      /*
+       * Giramos el video horizontal 90°.
+       */
 
-    );
+      ctx.translate(
+        destinoAncho,
+        0
+      );
+
+      ctx.rotate(
+        Math.PI / 2
+      );
+
+
+      /*
+       * El canvas temporal después de la rotación
+       * tiene dimensiones:
+       *
+       * 1920 x 1080
+       *
+       * que se convierten en:
+       *
+       * 1080 x 1920
+       *
+       * =================================================
+       *
+       * Zoom 1x:
+       * usamos TODO el video.
+       *
+       * Zoom 2x:
+       * recortamos desde el centro.
+       * =================================================
+       */
+
+      const anchoRotado =
+        videoAlto;
+
+      const altoRotado =
+        videoAncho;
+
+
+      /*
+       * Área que tomaremos del video.
+       */
+
+      const anchoFuente =
+        videoAncho /
+        factorZoom;
+
+      const altoFuente =
+        videoAlto /
+        factorZoom;
+
+
+      const sx =
+        (
+          videoAncho -
+          anchoFuente
+        ) / 2;
+
+      const sy =
+        (
+          videoAlto -
+          altoFuente
+        ) / 2;
+
+
+      ctx.drawImage(
+
+        video,
+
+        sx,
+        sy,
+        anchoFuente,
+        altoFuente,
+
+        0,
+        0,
+        destinoAlto,
+        destinoAncho
+
+      );
+
+    } else {
+
+      /*
+       * =================================================
+       * SI SAFARI ENTREGA EL VIDEO YA EN VERTICAL
+       * =================================================
+       */
+
+      const anchoFuente =
+        videoAncho /
+        factorZoom;
+
+      const altoFuente =
+        videoAlto /
+        factorZoom;
+
+
+      const sx =
+        (
+          videoAncho -
+          anchoFuente
+        ) / 2;
+
+      const sy =
+        (
+          videoAlto -
+          altoFuente
+        ) / 2;
+
+
+      ctx.drawImage(
+
+        video,
+
+        sx,
+        sy,
+        anchoFuente,
+        altoFuente,
+
+        0,
+        0,
+        destinoAncho,
+        destinoAlto
+
+      );
+
+    }
+
+
+    ctx.restore();
 
 
     /*
@@ -310,69 +788,80 @@ tomarFoto.addEventListener(
       new Image();
 
 
-    marco.onload = () => {
+    marco.onload =
+      () => {
 
-      /*
-       * El marco tiene exactamente 1080x1920.
-       *
-       * Se dibuja encima SIN deformarlo.
-       */
+        /*
+         * El marco es 1080 x 1920.
+         */
 
-      ctx.drawImage(
+        ctx.drawImage(
 
-        marco,
+          marco,
 
-        0,
-        0,
-        destinoAncho,
-        destinoAlto
+          0,
+          0,
+          destinoAncho,
+          destinoAlto
 
-      );
-
-
-      /*
-       * PNG final.
-       */
-
-      const imagen =
-        canvas.toDataURL(
-          "image/png"
         );
 
 
-      fotoFinal.src =
-        imagen;
+        /*
+         * =================================================
+         * GENERAR PNG
+         * =================================================
+         */
 
-      descargar.href =
-        imagen;
-
-
-      camara.classList.add(
-        "oculto"
-      );
-
-      resultado.classList.remove(
-        "oculto"
-      );
-
-
-      /*
-       * Apagar cámara.
-       */
-
-      if (stream) {
-
-        stream
-          .getTracks()
-          .forEach(
-            track => track.stop()
+        const imagen =
+          canvas.toDataURL(
+            "image/png"
           );
 
-        stream = null;
 
-      }
+        /*
+         * Mostrar fotografía.
+         */
 
-    };
+        fotoFinal.src =
+          imagen;
+
+
+        descargar.href =
+          imagen;
+
+
+        /*
+         * Cambiar pantalla.
+         */
+
+        camara.classList.add(
+          "oculto"
+        );
+
+        resultado.classList.remove(
+          "oculto"
+        );
+
+
+        /*
+         * Apagar cámara.
+         */
+
+        if (stream) {
+
+          stream
+            .getTracks()
+            .forEach(
+              track =>
+                track.stop()
+            );
+
+          stream = null;
+
+        }
+
+      };
 
 
     marco.src =
@@ -419,6 +908,7 @@ compartir.addEventListener(
           fotoFinal.src
         );
 
+
       const blob =
         await respuesta.blob();
 
@@ -431,7 +921,8 @@ compartir.addEventListener(
           "J-T-15-08-2026.png",
 
           {
-            type: "image/png"
+            type:
+              "image/png"
           }
 
         );
