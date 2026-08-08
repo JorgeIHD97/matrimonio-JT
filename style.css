@@ -1,7 +1,3 @@
-/* =====================================================
-   CONFIGURACIÓN GENERAL
-===================================================== */
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,474 +8,186 @@ html,
 body {
   width: 100%;
   height: 100%;
-
   overflow: hidden;
-
-  background: #000;
-
-  font-family:
-    -apple-system,
-    BlinkMacSystemFont,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
 }
 
 body {
-  position: relative;
+  background: #f7f5f0;
 }
 
-
-/* =====================================================
-   PANTALLAS
-===================================================== */
+.app {
+  width: 100%;
+  height: 100dvh;
+}
 
 .pantalla {
   width: 100%;
-  height: 100dvh;
-
-  position: relative;
-
-  overflow: hidden;
+  height: 100%;
 }
 
 .oculto {
   display: none !important;
 }
 
+/* INICIO */
 
-/* =====================================================
-   INICIO
-===================================================== */
-
-.inicio {
+#inicio {
   display: flex;
-
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-
-  background: #000;
-
-  color: #fff;
-}
-
-.inicioContenido {
+  align-items: center;
   text-align: center;
-
   padding: 30px;
 }
 
-.inicioContenido h1 {
-  font-size: 48px;
-
-  font-weight: 400;
-
-  letter-spacing: 8px;
-
-  margin-bottom: 12px;
-}
-
-.inicioContenido p {
-  font-size: 18px;
-
+.monograma {
+  font-size: 42px;
   letter-spacing: 4px;
-
-  margin-bottom: 45px;
+  color: #9b6556;
+  margin-bottom: 8px;
 }
 
-.inicioContenido button {
-  border: 1px solid #fff;
+.fecha {
+  font-size: 16px;
+  letter-spacing: 6px;
+  color: #77736c;
+}
 
-  background: transparent;
+.mensaje {
+  margin-top: 60px;
+  margin-bottom: 35px;
+  line-height: 1.7;
+  font-size: 20px;
+  color: #5f5b55;
+}
 
-  color: #fff;
-
-  padding: 15px 28px;
-
+.boton {
+  border: none;
   border-radius: 30px;
-
-  font-size: 14px;
-
+  padding: 15px 30px;
+  background: #9b6556;
+  color: white;
+  font-size: 13px;
   letter-spacing: 2px;
+  cursor: pointer;
 }
 
+.boton:active {
+  transform: scale(.97);
+}
 
-/* =====================================================
-   CÁMARA
-===================================================== */
+/* CÁMARA */
 
-.camara {
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: space-between;
-
+.camaraPantalla {
+  position: relative;
   background: #000;
 }
-
-
-/* =====================================================
-   VISOR
-===================================================== */
 
 .visor {
   position: relative;
-
-  width: 100%;
-
-  /*
-   * El visor ocupa todo el espacio disponible
-   * por encima de los controles.
-   */
-
-  height: calc(
-    100dvh - 150px
-  );
-
-  overflow: hidden;
-
-  background: #000;
-
-  flex-shrink: 0;
-}
-
-
-/* =====================================================
-   VIDEO
-===================================================== */
-
-#video {
-  position: absolute;
-
-  inset: 0;
-
   width: 100%;
   height: 100%;
-
-  /*
-   * Inicialmente NO recortamos.
-   *
-   * Queremos comprobar exactamente cómo Safari
-   * y Chrome entregan el video.
-   */
-
-  object-fit: contain;
-
-  background: #000;
-
-  transform: none;
-
-  transform-origin: center center;
-
-  /*
-   * Evitar que el navegador genere comportamientos
-   * táctiles propios sobre el video.
-   */
-
-  touch-action: none;
+  overflow: hidden;
 }
 
-
-/* =====================================================
-   MARCO
-===================================================== */
+#video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 #marco {
   position: absolute;
-
   inset: 0;
-
   width: 100%;
   height: 100%;
-
-  object-fit: fill;
-
+  object-fit: cover;
   pointer-events: none;
-
-  z-index: 5;
 }
-
-
-/* =====================================================
-   PUNTO DE ENFOQUE
-===================================================== */
-
-#puntoEnfoque {
-  position: absolute;
-
-  width: 65px;
-  height: 65px;
-
-  border: 2px solid #fff;
-
-  border-radius: 50%;
-
-  pointer-events: none;
-
-  display: none;
-
-  transform:
-    translate(-50%, -50%);
-
-  z-index: 10;
-
-  opacity: 0;
-}
-
-#puntoEnfoque.visible {
-  display: block;
-
-  opacity: 1;
-}
-
-
-/* =====================================================
-   CONTROLES
-===================================================== */
 
 .controles {
-  width: 100%;
-
-  height: 150px;
-
-  flex-shrink: 0;
-
-  background: #000;
-
-  padding:
-    10px
-    20px
-    calc(
-      10px + env(safe-area-inset-bottom)
-    );
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  justify-content: space-between;
-}
-
-
-/* =====================================================
-   BOTONES DE ZOOM
-===================================================== */
-
-.controlesZoom {
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  gap: 8px;
-}
-
-.controlesZoom button {
-  border: none;
-
-  background: transparent;
-
-  color: #fff;
-
-  font-size: 15px;
-
-  padding: 5px 10px;
-
-  border-radius: 15px;
-}
-
-.controlesZoom button.activo {
-  background: rgba(
-    255,
-    255,
-    255,
-    0.2
-  );
-}
-
-
-/* =====================================================
-   SLIDER
-===================================================== */
-
-#zoomSlider {
-  width: min(
-    260px,
-    70vw
-  );
-
-  accent-color: #fff;
-}
-
-
-/* =====================================================
-   CONTROLES PRINCIPALES
-===================================================== */
-
-.controlesPrincipales {
-  width: 100%;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
-
-  position: relative;
-}
-
-
-/* =====================================================
-   CAMBIAR CÁMARA
-===================================================== */
-
-#cambiarCamara {
   position: absolute;
-
-  left: 20px;
-
-  width: 45px;
-  height: 45px;
-
-  border: 1px solid rgba(
-    255,
-    255,
-    255,
-    0.8
-  );
-
-  border-radius: 50%;
-
-  background: rgba(
-    0,
-    0,
-    0,
-    0.35
-  );
-
-  color: #fff;
-
-  font-size: 24px;
+  bottom: max(35px, env(safe-area-inset-bottom));
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+.disparador {
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  border: 5px solid white;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
-/* =====================================================
-   OBTURADOR
-===================================================== */
-
-.obturador {
+.disparador span {
   width: 62px;
   height: 62px;
-
   border-radius: 50%;
-
-  border: 4px solid #fff;
-
-  background: #fff;
-
-  position: relative;
+  background: white;
 }
 
-.obturador::after {
-  content: "";
-
+.pequeño {
   position: absolute;
-
-  inset: 5px;
-
+  right: 25px;
+  width: 48px;
+  height: 48px;
+  padding: 0;
   border-radius: 50%;
-
-  border: 2px solid #000;
+  font-size: 25px;
 }
 
+/* RESULTADO */
 
-/* =====================================================
-   RESULTADO
-===================================================== */
-
-.resultado {
-  background: #000;
-
+#resultado {
   overflow-y: auto;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: center;
+  padding: 25px;
+  text-align: center;
 }
 
-.resultadoContenido {
+.fotoResultado {
   width: 100%;
-
-  max-width: 600px;
-
-  padding: 20px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  align-items: center;
-
-  gap: 20px;
+  max-width: 500px;
+  margin: 0 auto 25px;
 }
 
-
-/* =====================================================
-   FOTO FINAL
-===================================================== */
-
-#fotoFinal {
-  display: block;
-
+.fotoResultado img {
   width: 100%;
-
   height: auto;
-
-  max-height: 75dvh;
-
-  object-fit: contain;
+  display: block;
 }
-
-
-/* =====================================================
-   ACCIONES
-===================================================== */
 
 .acciones {
-  width: 100%;
-
+  max-width: 500px;
+  margin: auto;
   display: flex;
-
   flex-direction: column;
-
-  gap: 10px;
+  gap: 12px;
 }
 
-.acciones button,
-.acciones a {
-  width: 100%;
-
-  padding: 14px;
-
-  border-radius: 25px;
-
-  border: 1px solid #fff;
-
-  background: transparent;
-
-  color: #fff;
-
-  text-align: center;
-
+.acciones .boton {
   text-decoration: none;
+  display: block;
+}
 
-  font-size: 14px;
+.secundario {
+  background: transparent;
+  border: 1px solid #9b6556;
+  color: #9b6556;
+}
 
+.textoBoton {
+  background: none;
+  border: none;
+  padding: 15px;
+  color: #77736c;
+  font-size: 13px;
   letter-spacing: 1px;
 }
