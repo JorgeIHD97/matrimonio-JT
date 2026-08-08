@@ -2,201 +2,73 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5f0">
   <title>J & T · 15.08.2026</title>
-
   <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <!-- ==================================================
-       PANTALLA INICIAL
-  =================================================== -->
+  <main class="app">
 
-  <main id="inicio" class="pantalla inicio">
+    <section id="inicio" class="pantalla">
+      <div class="monograma">J & T</div>
+      <p class="fecha">15 . 08 . 2026</p>
 
-    <div class="inicioContenido">
-
-      <h1>J & T</h1>
-
-      <p>
-        15.08.2026
+      <p class="mensaje">
+        Comparte un recuerdo<br>
+        de nuestro día
       </p>
 
-      <button
-        id="abrirCamara"
-        type="button"
-      >
+      <button id="abrirCamara" class="boton">
         ABRIR CÁMARA
       </button>
+    </section>
 
-    </div>
+    <section id="camara" class="pantalla camaraPantalla oculto">
 
-  </main>
-
-
-  <!-- ==================================================
-       PANTALLA DE CÁMARA
-  =================================================== -->
-
-  <main
-    id="camara"
-    class="pantalla camara oculto"
-  >
-
-    <div class="visor">
-
-      <!-- Cámara -->
-      <video
-        id="video"
-        autoplay
-        playsinline
-        muted
-      ></video>
-
-      <!-- Marco -->
-      <img
-        id="marco"
-        src="marco.png"
-        alt=""
-      >
-
-      <!-- Punto de enfoque -->
-      <div
-        id="puntoEnfoque"
-        aria-hidden="true"
-      ></div>
-
-    </div>
-
-
-    <!-- ==================================================
-         CONTROLES
-    =================================================== -->
-
-    <div class="controles">
-
-      <!-- Zoom -->
-      <div class="controlesZoom">
-
-        <button
-          id="zoom05"
-          type="button"
-        >
-          0.5×
-        </button>
-
-        <button
-          id="zoom1"
-          type="button"
-          class="activo"
-        >
-          1×
-        </button>
-
-        <button
-          id="zoom2"
-          type="button"
-        >
-          2×
-        </button>
-
+      <div class="visor">
+        <video id="video" autoplay playsinline></video>
+        <img id="marco" src="marco.png" alt="">
       </div>
 
-
-      <!-- Deslizador -->
-      <input
-        id="zoomSlider"
-        type="range"
-        min="0.5"
-        max="2"
-        step="0.1"
-        value="1"
-        aria-label="Zoom"
-      >
-
-
-      <!-- Botones principales -->
-      <div class="controlesPrincipales">
-
-        <button
-          id="cambiarCamara"
-          type="button"
-          aria-label="Cambiar cámara"
-        >
+      <div class="controles">
+        <button id="cambiarCamara" class="boton pequeño">
           ↻
         </button>
 
-        <button
-          id="tomarFoto"
-          type="button"
-          class="obturador"
-          aria-label="Tomar fotografía"
-        >
+        <button id="tomarFoto" class="disparador">
+          <span></span>
         </button>
-
       </div>
 
-    </div>
+    </section>
 
-  </main>
+    <section id="resultado" class="pantalla oculto">
 
-
-  <!-- ==================================================
-       RESULTADO
-  =================================================== -->
-
-  <main
-    id="resultado"
-    class="pantalla resultado oculto"
-  >
-
-    <div class="resultadoContenido">
-
-      <img
-        id="fotoFinal"
-        src=""
-        alt="Fotografía"
-      >
+      <div class="fotoResultado">
+        <img id="fotoFinal" alt="Foto del matrimonio">
+      </div>
 
       <div class="acciones">
-
-        <a
-          id="descargar"
-          href="#"
-          download="J-T-15-08-2026.png"
-        >
-          GUARDAR FOTO
-        </a>
-
-        <button
-          id="compartir"
-          type="button"
-        >
+        <button id="compartir" class="boton">
           COMPARTIR
         </button>
 
-        <button
-          id="otraFoto"
-          type="button"
-        >
-          OTRA FOTO
-        </button>
+        <a id="descargar" class="boton secundario" download="J-T-15-08-2026.png">
+          GUARDAR FOTO
+        </a>
 
+        <button id="otraFoto" class="textoBoton">
+          TOMAR OTRA FOTO
+        </button>
       </div>
 
-    </div>
+    </section>
 
   </main>
 
-
   <script src="app.js"></script>
-
 </body>
 </html>
