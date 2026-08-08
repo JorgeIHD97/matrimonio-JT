@@ -72,11 +72,6 @@ async function iniciarCamara() {
 
     video.srcObject =
       stream;
-     if (usandoFrontal) {
-        video.classList.add ("selfie");
-     } else
-        video.classList.remove ("selfie")
-  }
 
 
     /*
