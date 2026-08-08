@@ -8,102 +8,101 @@
     content="width=device-width, initial-scale=1.0, viewport-fit=cover"
   >
 
-  <meta
-    name="theme-color"
-    content="#f7f5f0"
-  >
-
   <title>J & T · 15.08.2026</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-  <main class="app">
+  <!-- ==================================================
+       PANTALLA INICIAL
+  =================================================== -->
 
-    <!-- =========================
-         PANTALLA INICIAL
-    ========================== -->
+  <main id="inicio" class="pantalla inicio">
 
-    <section
-      id="inicio"
-      class="pantalla"
-    >
+    <div class="inicioContenido">
 
-      <div class="monograma">
-        J & T
-      </div>
+      <h1>J & T</h1>
 
-      <p class="fecha">
-        15 . 08 . 2026
-      </p>
-
-      <p class="mensaje">
-        Comparte un recuerdo<br>
-        de nuestro día
+      <p>
+        15.08.2026
       </p>
 
       <button
         id="abrirCamara"
-        class="boton"
+        type="button"
       >
         ABRIR CÁMARA
       </button>
 
-    </section>
+    </div>
+
+  </main>
 
 
-    <!-- =========================
-         CÁMARA
-    ========================== -->
+  <!-- ==================================================
+       PANTALLA DE CÁMARA
+  =================================================== -->
 
-    <section
-      id="camara"
-      class="pantalla camaraPantalla oculto"
-    >
+  <main
+    id="camara"
+    class="pantalla camara oculto"
+  >
 
-      <div class="visor">
+    <div class="visor">
 
-        <video
-          id="video"
-          autoplay
-          playsinline
-        ></video>
+      <!-- Cámara -->
+      <video
+        id="video"
+        autoplay
+        playsinline
+        muted
+      ></video>
 
-        <img
-          id="marco"
-          src="marco.png"
-          alt=""
-        >
+      <!-- Marco -->
+      <img
+        id="marco"
+        src="marco.png"
+        alt=""
+      >
 
-      </div>
+      <!-- Punto de enfoque -->
+      <div
+        id="puntoEnfoque"
+        aria-hidden="true"
+      ></div>
+
+    </div>
 
 
-      <!-- CONTROLES DE ZOOM -->
+    <!-- ==================================================
+         CONTROLES
+    =================================================== -->
 
+    <div class="controles">
+
+      <!-- Zoom -->
       <div class="controlesZoom">
 
         <button
           id="zoom05"
-          class="zoomBoton"
+          type="button"
         >
           0.5×
         </button>
 
         <button
           id="zoom1"
-          class="zoomBoton activo"
+          type="button"
+          class="activo"
         >
           1×
         </button>
 
         <button
           id="zoom2"
-          class="zoomBoton"
+          type="button"
         >
           2×
         </button>
@@ -111,33 +110,24 @@
       </div>
 
 
-      <!-- DESLIZADOR -->
-
-      <div class="zoomDeslizador">
-
-        <span>−</span>
-
-        <input
-          id="zoomSlider"
-          type="range"
-          min="0.5"
-          max="2"
-          step="0.01"
-          value="1"
-        >
-
-        <span>+</span>
-
-      </div>
+      <!-- Deslizador -->
+      <input
+        id="zoomSlider"
+        type="range"
+        min="0.5"
+        max="2"
+        step="0.1"
+        value="1"
+        aria-label="Zoom"
+      >
 
 
-      <!-- CONTROLES PRINCIPALES -->
-
-      <div class="controles">
+      <!-- Botones principales -->
+      <div class="controlesPrincipales">
 
         <button
           id="cambiarCamara"
-          class="boton pequeño"
+          type="button"
           aria-label="Cambiar cámara"
         >
           ↻
@@ -145,67 +135,63 @@
 
         <button
           id="tomarFoto"
-          class="disparador"
+          type="button"
+          class="obturador"
           aria-label="Tomar fotografía"
         >
-
-          <span></span>
-
         </button>
 
       </div>
 
-    </section>
+    </div>
+
+  </main>
 
 
-    <!-- =========================
-         RESULTADO
-    ========================== -->
+  <!-- ==================================================
+       RESULTADO
+  =================================================== -->
 
-    <section
-      id="resultado"
-      class="pantalla oculto"
-    >
+  <main
+    id="resultado"
+    class="pantalla resultado oculto"
+  >
 
-      <div class="fotoResultado">
+    <div class="resultadoContenido">
 
-        <img
-          id="fotoFinal"
-          alt="Foto del matrimonio"
-        >
-
-      </div>
-
+      <img
+        id="fotoFinal"
+        src=""
+        alt="Fotografía"
+      >
 
       <div class="acciones">
 
-        <button
-          id="compartir"
-          class="boton"
-        >
-          COMPARTIR
-        </button>
-
-
         <a
           id="descargar"
-          class="boton secundario"
+          href="#"
           download="J-T-15-08-2026.png"
         >
           GUARDAR FOTO
         </a>
 
+        <button
+          id="compartir"
+          type="button"
+        >
+          COMPARTIR
+        </button>
 
         <button
           id="otraFoto"
-          class="textoBoton"
+          type="button"
         >
-          TOMAR OTRA FOTO
+          OTRA FOTO
         </button>
 
       </div>
 
-    </section>
+    </div>
 
   </main>
 
