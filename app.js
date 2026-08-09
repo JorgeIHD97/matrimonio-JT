@@ -6,6 +6,7 @@ const abrirCamara = document.getElementById("abrirCamara");
 const cambiarCamara = document.getElementById("cambiarCamara");
 const tomarFoto = document.getElementById("tomarFoto");
 const otraFoto = document.getElementById("otraFoto");
+const volverInicio = document.getElementById("volverInicio");
 
 const video = document.getElementById("video");
 const fotoFinal = document.getElementById("fotoFinal");
