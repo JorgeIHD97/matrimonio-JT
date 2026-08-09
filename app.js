@@ -823,3 +823,22 @@ compartir.addEventListener(
 
   }
 );
+
+/* =====================================================
+   VOLVER AL MENÚ PRINCIPAL
+===================================================== */
+
+volverInicio.addEventListener(
+  "click",
+  () => {
+
+    resultado.classList.add(
+      "oculto"
+    );
+
+    inicio.classList.remove(
+      "oculto"
+    );
+
+  }
+);
